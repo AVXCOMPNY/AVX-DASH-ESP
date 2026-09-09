@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AVEROX ESPORTS Dashboard</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,Helvetica,sans-serif;background:#090909;color:#fff}
+.sidebar{position:fixed;left:0;top:0;width:240px;height:100vh;background:#111;border-right:1px solid #292929;padding:24px 16px}
+.logo{width:90px;height:90px;object-fit:contain;display:block;margin:0 auto 12px;border-radius:14px}
+.brand{text-align:center;font-weight:800;font-size:20px;margin-bottom:28px}
+.menu button{width:100%;padding:13px;margin:6px 0;border:0;border-radius:10px;background:#1b1b1b;color:#ddd;text-align:left;cursor:pointer;font-size:15px}
+.menu button:hover,.menu button.active{background:#e50914;color:white}
+.main{margin-left:240px;padding:32px;min-height:100vh}
+.top{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:28px}
+h1{margin:0;font-size:32px}
+.sub{color:#999;margin-top:7px}
+.role{padding:9px 13px;border:1px solid #333;border-radius:20px;color:#bbb}
+.page{display:none}.page.active{display:block}
+.cards{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.card{background:#131313;border:1px solid #292929;border-radius:15px;padding:22px}
+.card small{color:#999}.value{font-size:28px;font-weight:800;margin-top:10px}
+.profit{color:#39d353}
+.loss{color:#ff5964}
+.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:18px;margin-top:20px}
+.panel{background:#131313;border:1px solid #292929;border-radius:15px;padding:22px}
+.panel h2{margin-top:0}
+table{width:100%;border-collapse:collapse}
+th,td{padding:13px;border-bottom:1px solid #292929;text-align:left}
+th{color:#999}
+select{font:inherit} input{width:100%;padding:12px;background:#0c0c0c;color:white;border:1px solid #333;border-radius:9px;margin:7px 0 14px}
+label{color:#aaa;font-size:14px}
+.primary{border:0;border-radius:9px;padding:12px 17px;background:#e50914;color:white;font-weight:700;cursor:pointer}
+.secondary{border:1px solid #444;border-radius:9px;padding:12px 17px;background:#1b1b1b;color:white;cursor:pointer}
+.hidden{display:none!important}
+.login{max-width:430px;margin:50px auto}
+.msg{padding:10px 0;color:#ff5964}
+.success{color:#39d353}
+@media(max-width:900px){
+.sidebar{width:190px}.main{margin-left:190px}.cards{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}
+}
+@media(max-width:600px){
+.sidebar{position:static;width:100%;height:auto}.main{margin-left:0;padding:18px}.cards{grid-template-columns:1fr}.top{align-items:flex-start;flex-direction:column}
+}
+</style>
+
+<style>
+.pl-circular-wrap{display:flex;gap:28px;align-items:center;justify-content:center;flex-wrap:wrap;margin:20px 0}
+.pl-circle{width:230px;height:230px;border-radius:50%;position:relative;display:flex;align-items:center;justify-content:center;
+background:conic-gradient(#22c55e 0deg 50%, #ef4444 50% 100%);box-shadow:0 12px 35px rgba(0,0,0,.25)}
+.pl-circle::after{content:"";width:145px;height:145px;border-radius:50%;background:#111827;position:absolute}
+.pl-center{position:relative;z-index:2;text-align:center;color:#fff;font-weight:700}
+.pl-center small{display:block;font-weight:500;opacity:.75;margin-top:5px}
+.pl-legend{min-width:210px}
+.pl-legend div{display:flex;justify-content:space-between;gap:20px;padding:10px 12px;margin:7px 0;border-radius:10px;background:rgba(255,255,255,.06)}
+.pl-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:8px}
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <img class="logo" src="logo.jpg" alt="AVEROX ESPORTS">
+  <div class="brand">AVEROX ESPORTS</div>
+  <div class="menu">
+    <button id="btnDashboard" class="active" onclick="showPage('dashboard')">📊 Dashboard</button>
+    <button id="btnPL" onclick="showPage('pl')">📈 Profit & Loss</button>
+    <button id="btnLogin" onclick="showPage('login')">🔐 Login</button>
+    <button id="btnAdmin" class="hidden" onclick="showPage('admin')">⚙️ Update Panel</button>
+    <button id="btnMatches" onclick="showPage('matches')">🎮 Match & Tournament</button>
+    <button id="btnUpcoming" onclick="showPage('upcoming')">📅 Upcoming Matches</button>
+    <button id="btnPlayer" onclick="showPage('player')">👤 Player Dashboard</button>
+    <button id="btnPhotos" onclick="showPage('photos')">🖼️ Photos</button>
+  </div>
+</aside>
+
+<main class="main">
+  <div class="top">
+    <div>
+      <h1>AVEROX ESPORTS</h1>
+      <div class="sub">Esports financial dashboard</div>
+    </div>
+    <div class="role" id="roleText">👤 Viewer</div>
+  </div>
+
+  <section id="dashboard" class="page">
+    <div class="cards">
+      <div class="card"><small>Total Cost</small><div class="value" id="revenue">৳72,500</div></div>
+      <div class="card"><small>Current Balance</small><div class="value profit" id="expenses">৳52,500</div></div>
+      <div class="card"><small>Events / Matches</small><div class="value" id="events">18</div></div>
+      <div class="card"><small>Profit / Loss</small><div class="value" id="dashboardProfitLoss">৳0</div></div>
+    </div>
+
+    <div class="grid">
+      <div class="panel">
+        <h2>Financial Overview</h2>
+        <p>Total Cost: <b id="rev2">৳72,500</b></p>
+        <p>Current Balance: <b id="exp2">৳52,500</b></p>
+        <p>Profit / Loss: <b id="dashPL2">৳0</b></p>
+      </div>
+      <div class="panel">
+        <h2>Account</h2>
+        <p id="accountInfo">You are viewing the dashboard as a Viewer.</p>
+        <button class="secondary hidden" id="logoutBtn" onclick="logout()">Logout</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="pl" class="page">
+    <div class="panel">
+      <h2>Profit & Loss Report</h2>
+      <table>
+        <tr><th>Item</th><th>Amount</th></tr>
+        <tr><td>Total Cost</td><td id="plRevenue">৳72,500</td></tr>
+        <tr><td>Current Balance</td><td id="plExpenses">৳52,500</td></tr>
+        <tr><td>Profit (Admin Updated)</td><td class="profit" id="plSeparateProfit">৳0</td></tr>
+        <tr><td>Total Profit from Matches</td><td class="profit" id="plProfit">৳0</td></tr>
+        <tr><td>Total Loss</td><td class="loss" id="plLoss">৳0</td></tr>
+        <tr><td><b>Net Profit / Loss</b></td><td id="plNet">৳0</td></tr>
+      </table>
+      <br>
+      <button class="secondary" onclick="window.print()">🖨 Print Report</button>
+    </div>
+  </section>
+
+  <section id="login" class="page">
+    <div class="panel login">
+      <h2>🔐 Login</h2>
+      <p class="sub">Admin has full control. Coach can view the full website without edit access.</p>
+      <label>Username</label>
+      <input id="username" placeholder="admin or coach">
+      <label>Password</label>
+      <input id="password" type="password" placeholder="Enter password">
+      <button class="primary" onclick="login()">Login</button>
+      
+      <div id="loginMsg" class="msg"></div>
+    </div>
+  </section>
+
+  <section id="admin" class="page">
+    <div class="panel">
+      <h2>⚙️ Admin Update Panel</h2>
+      <p class="sub">You are logged in as Admin. Update the figures below and save them.</p>
+      <div class="grid">
+        <div>
+          <label>Total Cost</label>
+          <input id="editRevenue" type="number" min="0">
+          <label>Current Balance</label>
+          <input id="editExpenses" type="number" min="0">
+          <label>Profit / Loss</label>
+          <input id="editProfit" type="number" step="any" placeholder="e.g. 5000, -5000 or 0">
+          <small style="display:block;margin-top:6px;opacity:.75">Positive = Profit • Negative = Loss • 0 = No Profit / Loss</small>
+        </div>
+        <div>
+          <label>Events / Matches</label>
+          <input id="editEvents" type="number" min="0">
+        </div>
+      </div>
+      <button class="primary" onclick="updateData()">🔄 Update Dashboard</button>
+      <span id="updateMsg"></span>
+    </div>
+  </section>
+
+  <section id="matches" class="page">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap">
+        <div>
+          <h2>🎮 Match Profit & Loss</h2>
+          <p class="sub">See which match made profit/loss, entry amount, and result.</p>
+        </div>
+        <button class="primary hidden" id="addMatchBtn" onclick="toggleMatchForm()">＋ Add Match</button>
+      </div>
+
+      <div id="matchForm" class="panel hidden" style="margin-top:18px;background:#0d0d0d">
+        <h3>Add Match</h3>
+        <div class="grid">
+          <div>
+            <label>Date</label>
+            <input id="mDate" type="date">
+            <label>Time</label>
+            <input id="mTime" type="time">
+            <label>Match Name / Tournament</label>
+            <input id="mName" placeholder="e.g. Weekly Scrim #1">
+            <label>Entry Fee</label>
+            <input id="mEntry" type="number" min="0" placeholder="e.g. 500">
+            <label>Position</label>
+            <input id="mPosition" placeholder="e.g. 1st / 2nd / 5th">
+          </div>
+          <div>
+            <label>Result</label>
+            <select id="mResult" style="width:100%;padding:12px;background:#0c0c0c;color:white;border:1px solid #333;border-radius:9px;margin:7px 0 14px">
+              <option value="profit">Profit / Won</option>
+              <option value="loss">Loss / Lost</option>
+            </select>
+            <label>Prize Pool</label>
+            <input id="mPrize" type="number" min="0" placeholder="e.g. 10000">
+            <label>Profit / Loss Amount</label>
+            <input id="mAmount" type="number" step="any" placeholder="e.g. 1000 or -1000">
+          </div>
+        </div>
+        <button class="primary" onclick="saveMatch()">Save Match</button>
+        <button class="secondary" onclick="toggleMatchForm()">Cancel</button>
+        <span id="matchMsg"></span>
+      </div>
+
+      <div style="overflow-x:auto;margin-top:20px">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>Date</th>
+              <th>Match / Tournament</th>
+              <th>Entry</th>
+              <th>Position</th>
+              <th>Prize Pool</th>
+              <th>Result</th>
+              <th>Profit / Loss</th>
+              <th class="adminOnly hidden">Action</th>
+            </tr>
+          </thead>
+          <tbody id="matchRows"></tbody>
+        </table>
+      </div>
+      <p id="noMatches" class="sub">No match records yet.</p>
+    </div>
+  </section>
+
+
+  <section id="player" class="page">
+    <div class="panel">
+      <h2>👤 Player Dashboard</h2>
+      <p class="sub">Match schedule and player results — position, time and date.</p>
+      <div style="overflow-x:auto;margin-top:20px">
+        <table>
+          <thead><tr>
+            <th>#</th><th>Date</th><th>Time</th><th>Match / Tournament</th><th>Position</th>
+          </tr></thead>
+          <tbody id="playerRows"></tbody>
+        </table>
+      </div>
+      <p id="noPlayerMatches" class="sub">No player match records yet.</p>
+    </div>
+  </section>
+
+  <section id="photos" class="page">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap">
+        <div>
+          <h2>🖼️ Player Photos</h2>
+          <p class="sub">Upload and view player/team photos.</p>
+        </div>
+        <button class="primary hidden" id="uploadPhotoBtn" onclick="document.getElementById('photoInput').click()">＋ Upload Photo</button>
+      </div>
+      <input id="photoInput" type="file" accept="image/*" multiple class="hidden" onchange="uploadPhotos(event)">
+      <div id="photoGallery" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:18px;margin-top:22px"></div>
+      <p id="noPhotos" class="sub">No photos uploaded yet.</p>
+    </div>
+  </section>
+
+  <section id="upcoming" class="page active">
+    <div class="panel">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:15px;flex-wrap:wrap">
+        <div>
+          <h2>📅 Upcoming Matches</h2>
+          <p class="sub">Upcoming matches and tournaments for AVEROX ESPORTS.</p>
+        </div>
+        <button class="primary hidden" id="addUpcomingBtn" onclick="toggleUpcomingForm()">＋ Add Upcoming</button>
+      </div>
+
+      <div id="upcomingForm" class="panel hidden" style="margin-top:18px;background:#0d0d0d">
+        <h3>Add Upcoming Match</h3>
+        <div class="grid">
+          <div>
+            <label>Date</label>
+            <input id="uDate" type="date">
+            <label>Match / Tournament</label>
+            <input id="uName" placeholder="e.g. AVEROX Weekly Cup">
+            <label>Entry Fee</label>
+            <input id="uEntry" type="number" min="0" placeholder="e.g. 500">
+          </div>
+          <div>
+            <label>Prize Pool</label>
+            <input id="uPrize" type="number" min="0" placeholder="e.g. 10000">
+            <label>Position Target</label>
+            <input id="uPosition" placeholder="e.g. Top 3">
+          </div>
+        </div>
+        <button class="primary" onclick="saveUpcoming()">Save Upcoming</button>
+        <button class="secondary" onclick="toggleUpcomingForm()">Cancel</button>
+        <span id="upcomingMsg"></span>
+      </div>
+
+      <div style="overflow-x:auto;margin-top:20px">
+        <table>
+          <thead><tr>
+            <th>#</th><th>Date</th><th>Match / Tournament</th><th>Entry</th><th>Prize Pool</th><th>Position</th><th class="adminOnly">Action</th>
+          </tr></thead>
+          <tbody id="upcomingRows"></tbody>
+        </table>
+      </div>
+      <p id="noUpcoming" class="sub">No upcoming matches added yet.</p>
+    </div>
+  </section>
+
+</main>
+
+<script>
+const defaultData={revenue:72500,expenses:52500,profit:0,events:18};
+let data=JSON.parse(localStorage.getItem("averoxData"))||defaultData;
+
+// Roles:
+// Admin = full control
+// Coach = full website view, no controls
+// Viewer/Guest = Upcoming Matches, Player Dashboard and Player Photos only
+let currentRole=sessionStorage.getItem("averoxRole")||
+  (sessionStorage.getItem("averoxAdmin")==="true" ? "admin" : "viewer");
+let isAdmin=currentRole==="admin";
+let isCoach=currentRole==="coach";
+let isLoggedIn=isAdmin||isCoach;
+
+function money(n){return "৳"+Number(n).toLocaleString("en-US")}
+
+let matches=JSON.parse(localStorage.getItem("averoxMatches"))||[];
+
+
+let upcoming=JSON.parse(localStorage.getItem("averoxUpcoming"))||[];
+let photos=JSON.parse(localStorage.getItem("averoxPhotos"))||[];
+
+
+function renderPhotos(){
+  const gallery=document.getElementById("photoGallery");
+  const no=document.getElementById("noPhotos");
+  const uploadBtn=document.getElementById("uploadPhotoBtn");
+  if(!gallery||!no)return;
+  gallery.innerHTML="";
+  no.style.display=photos.length?"none":"block";
+  uploadBtn.classList.toggle("hidden",!isAdmin);
+  photos.forEach((photo,i)=>{
+    const card=document.createElement("div");
+    card.className="panel";
+    card.style.padding="10px";
+    card.innerHTML=`<img src="${photo.data}" alt="${escapeHtml(photo.name||'Player photo')}" style="width:100%;height:220px;object-fit:cover;border-radius:10px;display:block">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px">
+        <small style="color:#aaa;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${escapeHtml(photo.name||'Player photo')}</small>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <a class="secondary" href="${photo.data}" download="${escapeHtml(photo.name||'player-photo.jpg')}" style="text-decoration:none;display:inline-flex;align-items:center;justify-content:center">Download</a>
+          ${isAdmin?`<button class="secondary" onclick="deletePhoto(${i})">Delete</button>`:""}
+        </div>
+      </div>`;
+    gallery.appendChild(card);
+  });
+}
+
+function uploadPhotos(event){
+  if(!isAdmin)return;
+  const files=Array.from(event.target.files||[]);
+  if(!files.length)return;
+  let remaining=files.length;
+  files.forEach(file=>{
+    if(!file.type.startsWith("image/")){ remaining--; return; }
+    const reader=new FileReader();
+    reader.onload=()=>{
+      photos.push({name:file.name,data:reader.result});
+      remaining--;
+      if(remaining===0){
+        localStorage.setItem("averoxPhotos",JSON.stringify(photos));
+        event.target.value="";
+        renderPhotos();
+      }
+    };
+    reader.onerror=()=>{remaining--; if(remaining===0){event.target.value="";renderPhotos();}};
+    reader.readAsDataURL(file);
+  });
+}
+
+function deletePhoto(i){
+  if(!isAdmin)return;
+  photos.splice(i,1);
+  localStorage.setItem("averoxPhotos",JSON.stringify(photos));
+  renderPhotos();
+}
+
+function renderUpcoming(){
+  const rows=document.getElementById("upcomingRows");
+  const no=document.getElementById("noUpcoming");
+  rows.innerHTML="";
+  no.style.display=upcoming.length?"none":"block";
+  upcoming.sort((a,b)=>(a.date||"").localeCompare(b.date||""));
+
+  upcoming.forEach((m,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`
+      <td>${i+1}</td>
+      <td>${m.date ? new Date(m.date+"T00:00:00").toLocaleDateString("en-GB") : "-"}</td>
+      <td>${escapeHtml(m.name)}</td>
+      <td>${money(m.entry)}</td>
+      <td>${money(m.prize)}</td>
+      <td>${escapeHtml(m.position||"-")}</td>
+      <td class="${isAdmin?"":"hidden"}"><button class="secondary" onclick="deleteUpcoming(${i})">Delete</button></td>
+    `;
+    rows.appendChild(tr);
+  });
+  document.getElementById("addUpcomingBtn").classList.toggle("hidden",!isAdmin);
+}
+
+function toggleUpcomingForm(){
+  if(!isAdmin)return;
+  document.getElementById("upcomingForm").classList.toggle("hidden");
+}
+
+function saveUpcoming(){
+  if(!isAdmin)return;
+  const date=document.getElementById("uDate").value;
+  const name=document.getElementById("uName").value.trim();
+  const entry=Number(document.getElementById("uEntry").value)||0;
+  const prize=Number(document.getElementById("uPrize").value)||0;
+  const position=document.getElementById("uPosition").value.trim();
+  const msg=document.getElementById("upcomingMsg");
+  if(!date||!name){
+    msg.className="msg"; msg.textContent="Date and match/tournament name are required."; return;
+  }
+  upcoming.push({date,name,entry,prize,position});
+  localStorage.setItem("averoxUpcoming",JSON.stringify(upcoming));
+  ["uDate","uName","uEntry","uPrize","uPosition"].forEach(id=>document.getElementById(id).value="");
+  msg.className="success"; msg.textContent=" ✓ Upcoming match saved!";
+  renderUpcoming();
+}
+function deleteUpcoming(i){
+  if(!isAdmin)return;
+  upcoming.splice(i,1);
+  localStorage.setItem("averoxUpcoming",JSON.stringify(upcoming));
+  renderUpcoming();
+}
+
+function renderPlayerDashboard(){
+  const rows=document.getElementById("playerRows");
+  const no=document.getElementById("noPlayerMatches");
+  if(!rows||!no)return;
+  rows.innerHTML="";
+  no.style.display=matches.length?"none":"block";
+  const sorted=[...matches].sort((a,b)=>((a.date||"")+" "+(a.time||"")).localeCompare((b.date||"")+" "+(b.time||"")));
+  sorted.forEach((m,i)=>{
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${i+1}</td>
+      <td>${m.date ? new Date(m.date+"T00:00:00").toLocaleDateString("en-GB") : "-"}</td>
+      <td>${escapeHtml(m.time||"-")}</td>
+      <td>${escapeHtml(m.name||"-")}</td>
+      <td>${escapeHtml(m.position||"-")}</td>`;
+    rows.appendChild(tr);
+  });
+}
+
+function renderMatches(){
+  const rows=document.getElementById("matchRows");
+  const no=document.getElementById("noMatches");
+  rows.innerHTML="";
+  no.style.display=matches.length?"none":"block";
+
+  matches.forEach((m,i)=>{
+    const tr=document.createElement("tr");
+    const signedAmount=Number(m.amount)||0;
+    const cls=signedAmount>=0?"profit":"loss";
+    const sign=signedAmount>0?"+":"";
+    tr.innerHTML=`
+      <td>${i+1}</td>
+      <td>${m.date ? new Date(m.date+"T00:00:00").toLocaleDateString("en-GB") : "-"}</td>
+      <td>${escapeHtml(m.name)}</td>
+      <td>${money(m.entry)}</td>
+      <td>${escapeHtml(m.position||"-")}</td>
+      <td>${money(m.prize||0)}</td>
+      <td class="${cls}">${signedAmount>=0?"WIN":"LOSS"}</td>
+      <td class="${cls}">${sign}${money(signedAmount)}</td>
+      <td class="adminOnly ${isAdmin?"":"hidden"}"><button class="secondary" onclick="deleteMatch(${i})">Delete</button></td>
+    `;
+    rows.appendChild(tr);
+  });
+
+  document.getElementById("addMatchBtn").classList.toggle("hidden",!isAdmin);
+  renderPlayerDashboard();
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]));
+}
+
+function toggleMatchForm(){
+  if(!isAdmin)return;
+  document.getElementById("matchForm").classList.toggle("hidden");
+}
+
+function saveMatch(){
+  if(!isAdmin)return;
+  const date=document.getElementById("mDate").value;
+  const time=document.getElementById("mTime").value;
+  const name=document.getElementById("mName").value.trim();
+  const entry=Number(document.getElementById("mEntry").value)||0;
+  const position=document.getElementById("mPosition").value.trim();
+  const prize=Number(document.getElementById("mPrize").value)||0;
+  const amount=Number(document.getElementById("mAmount").value);
+  const result=amount < 0 ? "loss" : "profit";
+  const msg=document.getElementById("matchMsg");
+
+  if(!date||!name||!Number.isFinite(amount)||amount===0){
+    msg.className="msg";
+    msg.textContent="Date, match name and a non-zero Profit / Loss Amount are required. Negative amounts are allowed.";
+    return;
+  }
+
+  matches.push({date,time,name,entry,position,prize,result,amount});
+  localStorage.setItem("averoxMatches",JSON.stringify(matches));
+  document.getElementById("mDate").value="";
+  document.getElementById("mTime").value="";
+  document.getElementById("mName").value="";
+  document.getElementById("mEntry").value="";
+  document.getElementById("mPosition").value="";
+  document.getElementById("mPrize").value="";
+  document.getElementById("mAmount").value="";
+  msg.className="success";
+  msg.textContent=" ✓ Match saved!";
+  renderMatches();
+}
+
+function deleteMatch(i){
+  if(!isAdmin)return;
+  matches.splice(i,1);
+  localStorage.setItem("averoxMatches",JSON.stringify(matches));
+  renderMatches();
+}
+
+function getProfitLossSummary(){
+  let profit=0, loss=0;
+  matches.forEach(m=>{
+    const n=Number(m.amount)||0;
+    if(n>0) profit+=n;
+    if(n<0) loss+=Math.abs(n);
+  });
+  return {profit, loss, net: profit-loss};
+}
+
+function render(){
+  // Financial figures stay independent: Total Cost and Current Balance are NOT
+  // added/subtracted from each other. Profit/Loss comes only from match records.
+  const pl=getProfitLossSummary();
+  const netClass=pl.net>0?"profit":pl.net<0?"loss":"";
+
+  document.getElementById("revenue").textContent=money(data.revenue);
+  document.getElementById("expenses").textContent=money(data.expenses);
+  const separateProfit=Number(data.profit)||0;
+  document.getElementById("events").textContent=data.events;
+  const dashboardPL=document.getElementById("dashboardProfitLoss");
+  const dashPL2=document.getElementById("dashPL2");
+  const plValue=Number(data.profit)||0;
+  const plText=(plValue>0?"+":"")+money(plValue);
+  if(dashboardPL){ dashboardPL.textContent=plText; dashboardPL.className="value "+(plValue>0?"profit":plValue<0?"loss":""); }
+  if(dashPL2){ dashPL2.textContent=plText; dashPL2.className=plValue>0?"profit":plValue<0?"loss":""; }
+
+  document.getElementById("rev2").textContent=money(data.revenue);
+  document.getElementById("exp2").textContent=money(data.expenses);
+  document.getElementById("plRevenue").textContent=money(data.revenue);
+  document.getElementById("plExpenses").textContent=money(data.expenses);
+  const plSeparate=document.getElementById("plSeparateProfit");
+  plSeparate.textContent=(separateProfit>0?"+":"")+money(separateProfit);
+  plSeparate.className=separateProfit>0?"profit":separateProfit<0?"loss":"";
+  document.getElementById("plProfit").textContent=money(pl.profit);
+  document.getElementById("plLoss").textContent=money(pl.loss);
+  const plNet=document.getElementById("plNet");
+  plNet.textContent=(pl.net>0?"+":"")+money(pl.net);
+  plNet.className=netClass;
+
+  document.getElementById("roleText").textContent=isAdmin?"👑 Admin":isCoach?"🧑‍🏫 Coach":"👤 Viewer";
+  document.getElementById("btnAdmin").classList.toggle("hidden",!isAdmin);
+  document.getElementById("logoutBtn").classList.toggle("hidden",!isLoggedIn);
+  document.getElementById("accountInfo").textContent=isAdmin?
+    "You are logged in as Admin. You have full control of the website.":
+    isCoach?"You are logged in as Coach. You can view the full website but cannot change anything.":
+    "You are viewing the public website as a Viewer. Only Upcoming Matches, Player Dashboard and Player Photos are available.";
+
+  // Navigation permissions
+  const allNav=["btnDashboard","btnPL","btnMatches","btnUpcoming","btnPlayer","btnPhotos"];
+  const viewerNav=["btnUpcoming","btnPlayer","btnPhotos"];
+  allNav.forEach(id=>document.getElementById(id).classList.toggle("hidden",!isLoggedIn && !viewerNav.includes(id)));
+  document.getElementById("btnLogin").classList.remove("hidden");
+  document.getElementById("btnLogin").textContent=isLoggedIn?"🔐 Account / Logout":"🔐 Admin / Coach Login";
+
+  renderMatches();
+  renderUpcoming();
+  renderPhotos();
+
+  if(isAdmin){
+    document.getElementById("editRevenue").value=data.revenue;
+    document.getElementById("editExpenses").value=data.expenses;
+    document.getElementById("editProfit").value=data.profit ?? 0;
+    document.getElementById("editEvents").value=data.events;
+  }
+}
+
+function showPage(id){
+  const viewerAllowed=["upcoming","player","photos","login"];
+  const loggedAllowed=["dashboard","pl","matches","upcoming","player","photos","login"];
+
+  if(id==="admin"&&!isAdmin){showPage("login");return}
+  if(!isLoggedIn && !viewerAllowed.includes(id)){showPage("login");return}
+  if(isLoggedIn && !loggedAllowed.includes(id) && id!=="admin"){showPage("dashboard");return}
+
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+  document.getElementById(id).classList.add("active");
+  document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));
+  const map={dashboard:"btnDashboard",pl:"btnPL",login:"btnLogin",admin:"btnAdmin",matches:"btnMatches",upcoming:"btnUpcoming",player:"btnPlayer",photos:"btnPhotos"};
+  document.getElementById(map[id]).classList.add("active");
+}
+
+function login(){
+  const u=document.getElementById("username").value.trim();
+  const p=document.getElementById("password").value;
+  const msg=document.getElementById("loginMsg");
+
+  // Demo/local login. For a real online site, use a backend authentication system.
+  if(u==="admin"&&p==="averox2026"){
+    currentRole="admin";
+    isAdmin=true;
+    isCoach=false;
+    isLoggedIn=true;
+    sessionStorage.setItem("averoxRole","admin");
+    sessionStorage.setItem("averoxAdmin","true");
+    msg.className="msg success";
+    msg.textContent="Admin login successful!";
+    render();
+    setTimeout(()=>showPage("admin"),250);
+  }else if(u==="coach"&&p==="coach2026"){
+    currentRole="coach";
+    isAdmin=false;
+    isCoach=true;
+    isLoggedIn=true;
+    sessionStorage.setItem("averoxRole","coach");
+    sessionStorage.removeItem("averoxAdmin");
+    msg.className="msg success";
+    msg.textContent="";
+    render();
+    setTimeout(()=>showPage("dashboard"),250);
+  }else{
+    msg.className="msg";
+    msg.textContent="Wrong username or password.";
+  }
+}
+
+function updateData(){
+  if(!isAdmin)return;
+  data={
+    revenue:Number(document.getElementById("editRevenue").value)||0,
+    expenses:Number(document.getElementById("editExpenses").value)||0,
+    profit:Number(document.getElementById("editProfit").value)||0,
+    events:Number(document.getElementById("editEvents").value)||0
+  };
+  localStorage.setItem("averoxData",JSON.stringify(data));
+  document.getElementById("updateMsg").className="success";
+  document.getElementById("updateMsg").textContent=" ✓ Dashboard updated!";
+  render();
+}
+
+function logout(){
+  currentRole="viewer";
+  isAdmin=false;
+  isCoach=false;
+  isLoggedIn=false;
+  sessionStorage.removeItem("averoxAdmin");
+  sessionStorage.removeItem("averoxRole");
+  render();
+  showPage("upcoming");
+}
+
+render();
+
+function renderCircularPL(){
+  const pl=getProfitLossSummary();
+  const total=pl.profit+pl.loss;
+  const pct=total ? (pl.profit/total)*360 : 180;
+  const circle=document.getElementById('plCircle');
+  if(circle) circle.style.background=`conic-gradient(#22c55e 0deg ${pct}deg,#ef4444 ${pct}deg 360deg)`;
+  const a=document.getElementById('plProfit'), b=document.getElementById('plLoss'), c=document.getElementById('plNet');
+  if(a) a.textContent=money(pl.profit);
+  if(b) b.textContent=money(pl.loss);
+  if(c) c.textContent=(pl.net>0?'+':'')+money(pl.net);
+}
+
+</script>
+<script>document.addEventListener('DOMContentLoaded',renderCircularPL);</script></body>
+</html>
